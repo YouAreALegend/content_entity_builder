@@ -173,7 +173,7 @@ class ContentType extends ConfigEntityBase implements ContentTypeInterface, Enti
    * {@inheritdoc}
    */
   public function getEntityPath($path) {
-    $paths = $this->setEntityPaths();
+    $paths = $this->getEntityPaths();
     $entity_path = isset($paths[$path]) ? $paths[$path] : '';
     return $entity_path;
   }
@@ -212,7 +212,7 @@ class ContentType extends ConfigEntityBase implements ContentTypeInterface, Enti
     $is_applied = $this->isApplied();
     $has_data = FALSE;
     if (!empty($is_applied)) {
-      $has_data = $this->entityManager()->getStorage($this->id())->hasData();
+      $has_data = $this->entityTypeManager()->getStorage($this->id())->hasData();
     }
     return ($is_applied && $has_data);
   }
@@ -256,7 +256,7 @@ class ContentType extends ConfigEntityBase implements ContentTypeInterface, Enti
     }
 
     if (!$this->isNew()) {
-      $this->entityManager()->getStorage($this->entityTypeId)->delete([$this->id() => $this]);
+      $this->entityTypeManager()->getStorage($this->entityTypeId)->delete([$this->id() => $this]);
     }
   }
 

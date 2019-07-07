@@ -3,7 +3,7 @@
 namespace Drupal\content_entity_builder\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -19,7 +19,7 @@ class ContentEntityBuilderLocalAction extends DeriverBase implements ContainerDe
   /**
    * The entity manager
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityManager;
 
@@ -28,10 +28,10 @@ class ContentEntityBuilderLocalAction extends DeriverBase implements ContainerDe
    *
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
    *   The route provider to load routes by name.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.
    */
-  public function __construct(RouteProviderInterface $route_provider, EntityManagerInterface $entity_manager) {
+  public function __construct(RouteProviderInterface $route_provider, EntityTypeManagerInterface $entity_manager) {
     $this->routeProvider = $route_provider;
     $this->entityManager = $entity_manager;
   }
@@ -42,7 +42,7 @@ class ContentEntityBuilderLocalAction extends DeriverBase implements ContainerDe
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
       $container->get('router.route_provider'),
-      $container->get('entity.manager')
+      $container->get('entity_type.manager')
     );
   }
 

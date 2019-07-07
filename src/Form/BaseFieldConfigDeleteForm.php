@@ -43,7 +43,7 @@ class BaseFieldConfigDeleteForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return $this->contentType->urlInfo('edit-form');
+    return $this->contentType->toUrl('edit-form');
   }
 
   /**
@@ -68,8 +68,12 @@ class BaseFieldConfigDeleteForm extends ConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->contentType->deleteBaseField($this->baseField);
-    drupal_set_message($this->t('The base field %name has been deleted.', ['%name' => $this->baseField->label()]));
-    $form_state->setRedirectUrl($this->contentType->urlInfo('edit-form'));
+    if (floatval(\Drupal::VERSION) >= 8.5) {
+      \Drupal::messenger()->addMessage($this->t('The base field %name has been deleted.', ['%name' => $this->baseField->label()]));
+    } else {
+      drupal_set_message($this->t('The base field %name has been deleted.', ['%name' => $this->baseField->label()]));
+    }
+    $form_state->setRedirectUrl($this->contentType->toUrl('edit-form'));
   }
 
 }

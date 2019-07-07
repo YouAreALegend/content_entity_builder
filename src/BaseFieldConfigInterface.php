@@ -5,7 +5,7 @@ namespace Drupal\content_entity_builder;
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Component\Plugin\ContextAwarePluginInterface;
-use Drupal\content_entity_builder\ContentTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Defines the interface for base field config.

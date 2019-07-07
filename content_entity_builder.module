@@ -35,7 +35,7 @@ function content_entity_builder_entity_type_build(array &$entity_types) {
         'list_builder' => 'Drupal\content_entity_builder\ContentEntityBuilderListBuilder',
         'access' => 'Drupal\content_entity_builder\ContentEntityBuilderAccessControlHandler',
         'views_data' => 'Drupal\views\EntityViewsData',
-        "storage_schema" => "Drupal\content_entity_builder\ContentEntityBuilderStorageSchema",		
+        'storage_schema' => 'Drupal\content_entity_builder\ContentEntityBuilderStorageSchema',
       ],
       'translatable' => FALSE,
       'provider' => 'content_entity_builder',

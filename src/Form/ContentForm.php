@@ -40,8 +40,7 @@ class ContentForm extends ContentEntityForm {
    */
   public function submit(array $form, FormStateInterface $form_state) {
     // Build the entity object from the submitted values.
-    $entity = parent::submit($form, $form_state);
-    return $entity;
+    parent::submitForm($form, $form_state);
   }
 
   /**
@@ -53,15 +52,27 @@ class ContentForm extends ContentEntityForm {
 
     switch ($status) {
       case SAVED_NEW:
-        drupal_set_message($this->t('Created the %label content.', [
-          '%label' => $entity->label(),
-        ]));
+        if (floatval(\Drupal::VERSION) >= 8.5) {
+          \Drupal::messenger()->addMessage($this->t('Created the %label content.', [
+            '%label' => $entity->label(),
+          ]));
+        } else {
+          drupal_set_message($this->t('Created the %label content.', [
+            '%label' => $entity->label(),
+          ]));
+        }
         break;
 
       default:
-        drupal_set_message($this->t('Saved the %label  content.', [
-          '%label' => $entity->label(),
-        ]));
+        if (floatval(\Drupal::VERSION) >= 8.5) {
+          \Drupal::messenger()->addMessage($this->t('Saved the %label  content.', [
+            '%label' => $entity->label(),
+          ]));
+        } else {
+          drupal_set_message($this->t('Saved the %label  content.', [
+            '%label' => $entity->label(),
+          ]));
+        }
     }
     $type = $entity->getEntityTypeId();
     $form_state->setRedirect("entity.$type.canonical", ["$type" => $entity->id()]);

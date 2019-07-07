@@ -2,14 +2,13 @@
 
 namespace Drupal\content_entity_builder\Form;
 
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\content_entity_builder\ConfigurableBaseFieldConfigInterface;
 use Drupal\content_entity_builder\BaseFieldConfigManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityFieldManager;
-use Drupal\Core\Database\Database;
 
 /**
  * Controller for content entity type edit form.
@@ -41,7 +40,7 @@ class ContentTypeEditForm extends ContentTypeFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity.manager')->getStorage('content_type'),
+      $container->get('entity_type.manager')->getStorage('content_type'),
       $container->get('plugin.manager.content_entity_builder.base_field_config')
     );
   }
@@ -151,7 +150,8 @@ class ContentTypeEditForm extends ContentTypeFormBase {
     foreach ($base_fields as $key => $definition) {
       // Skip it if dependency module does not exist.
       if (!empty($definition['dependency'])) {
-        $exist = \Drupal::moduleHandler()->moduleExists($definition['dependency']);
+        $exist = \Drupal::moduleHandler()
+          ->moduleExists($definition['dependency']);
         if (empty($exist)) {
           continue;
         }
@@ -372,7 +372,31 @@ class ContentTypeEditForm extends ContentTypeFormBase {
       $base_field->setApplied(TRUE);
     }
     parent::save($form, $form_state);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+    $this->entityTypeManager->clearCachedDefinitions();
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+    $complete_change_list = \Drupal::entityDefinitionUpdateManager()->getChangeList();
+
+    if ($complete_change_list) {
+      foreach ($complete_change_list as $entity_type_id => $change_list) {
+        if (!empty($change_list['entity_type'])) {
+          $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+          if ($entity_type instanceof ContentEntityTypeInterface) {
+            switch ($change_list['entity_type']) {
+              // Created.
+              case 1:
+                \Drupal::service('entity_type.listener')->onEntityTypeCreate($entity_type);
+                break;
+
+              // Updated.
+              case 2:
+                $original = $this->entityTypeManager->getLastInstalledDefinition($entity_type_id);
+                \Drupal::service('entity_type.listener')->onEntityTypeUpdate($entity_type, $original);
+                break;
+            }
+          }
+        }
+      }
+    }
     \Drupal::service('router.builder')->rebuild();
     \Drupal::cache('discovery')->deleteAll();
   }
@@ -385,8 +409,27 @@ class ContentTypeEditForm extends ContentTypeFormBase {
     foreach ($this->entity->getBaseFields() as $base_field) {
       $base_field->setApplied(TRUE);
     }
+    $id = trim($form_state->getValue('id'));
+    $schema = \Drupal::database()->schema();
+    $edit_link = $this->entity->toLink(t('Edit entity type'));
+    // Clear caches first.
+    $this->entity->entityTypeManager->clearCachedDefinitions();
+    $entity_type = $this->entity->entityTypeManager->getDefinition($this->entity->id());
+    if ($schema->tableExists($id)) {
+      $update_manager = \Drupal::entityDefinitionUpdateManager();
+      $update_manager->updateEntityType($entity_type);
+
+      $definitions = \Drupal::service('entity_field.manager')
+        ->getFieldStorageDefinitions($this->entity->id());
+      $update_manager->updateFieldableEntityType($entity_type, $definitions);
+
+      $this->logger($this->entity->id())->notice(
+        'Entity type %label has been updated.',
+        ['%label' => $this->entity->label(), 'link' => $edit_link]
+      );
+    }
     parent::save($form, $form_state);
-    \Drupal::entityDefinitionUpdateManager()->applyUpdates();
+
     \Drupal::service('router.builder')->rebuild();
     \Drupal::cache('discovery')->deleteAll();
   }
@@ -397,13 +440,13 @@ class ContentTypeEditForm extends ContentTypeFormBase {
   public function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
     $actions['submit']['#value'] = $this->t('Save');
-	/*
+    /*
     $actions['save_apply'] = [
       '#type' => 'submit',
       '#value' => $this->t('Save and apply updates'),
       '#submit' => ['::submitForm', '::saveAndApplyUpdates'],
     ];
-	*/
+    */
 
     return $actions;
   }
@@ -436,7 +479,8 @@ class ContentTypeEditForm extends ContentTypeFormBase {
   protected function updateBaseFieldWeights(array $base_fields) {
     foreach ($base_fields as $base_field_name => $base_field_data) {
       if ($this->entity->getBaseFields()->has($base_field_name)) {
-        $this->entity->getBaseField($base_field_name)->setWeight($base_field_data['weight']);
+        $this->entity->getBaseField($base_field_name)
+          ->setWeight($base_field_data['weight']);
       }
     }
   }

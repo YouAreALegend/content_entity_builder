@@ -18,7 +18,7 @@ class Content extends ContentEntityBase implements ContentInterface {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entityType) {
     $fields = parent::baseFieldDefinitions($entityType);
-    $content_type = \Drupal::entityManager()->getStorage('content_type')->load($entityType->id());
+    $content_type = \Drupal::entityTypeManager()->getStorage('content_type')->load($entityType->id());
     if(empty($content_type)) {
       return $fields;
     }

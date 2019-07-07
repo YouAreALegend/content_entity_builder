@@ -6,7 +6,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginBase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\content_entity_builder\ContentTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 
 /**
  * Provides a base class for tabs.

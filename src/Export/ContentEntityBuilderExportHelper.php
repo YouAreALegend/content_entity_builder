@@ -2,9 +2,9 @@
 
 namespace Drupal\content_entity_builder\Export;
 
-
 use Drupal\Core\Archiver\ArchiveTar;
 use Drupal\content_entity_builder\Entity\ContentType;
+use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * Class ContentEntityBuilderDownloadController.
@@ -52,7 +52,7 @@ class ContentEntityBuilderExportHelper{
 	$content_types = isset($this->config['content_types']) ? $this->config['content_types'] : [];
 	
 	foreach($content_types as $content_type_id){
-      $content_type = \Drupal::entityManager()->getStorage('content_type')->load($content_type_id);
+      $content_type = \Drupal::entityTypeManager()->getStorage('content_type')->load($content_type_id);
       $entity_name =  $content_type->id();
 	  $EntityName = str_replace(' ', '', ucwords(str_replace('_', ' ', $entity_name)));		
 	  $archiver->addString("src/Entity/$EntityName.php", $this->generateEntityPhp($content_type, $entity_name, $EntityName));
@@ -78,8 +78,7 @@ type: module
 description: @description
 core: 8.x
 Eof;
-
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@name" => isset($this->config['label']) ? $this->config['label'] : '',
       "@description" => isset($this->config['description']) ? $this->config['description'] : '',
     ));
@@ -100,7 +99,7 @@ Eof;
  */
 
 Eof;
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@description" => isset($this->config['description']) ? $this->config['description'] : '',
     ));
 	
@@ -245,7 +244,8 @@ Eof;
       $fields_code .= $base_field->exportCode();
     }
 	
-    //$content_type = \Drupal::entityManager()->getStorage('content_type')->load($content_type_id);
+    //$content_type = \Drupal::entityTypeManager()->getStorage('content_type')->load($content_type_id);
+    $content_type_id = $content_type->id();
     $paths = $content_type->getEntityPaths();
     $path_view = !empty($paths['view']) ? $paths['view'] : "/$content_type_id/{" . $content_type_id . "}";
     //$path_add = !empty($paths['add']) ? $paths['add'] : "/$content_type_id/add";
@@ -290,7 +290,7 @@ interface @EntityNameInterface extends ContentEntityInterface{
 
 Eof;
 
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@module_name" => $this->config['name'],
       "@entity_name" => $entity_name,
 	  "@EntityName" => $EntityName,
@@ -351,12 +351,12 @@ class @EntityNameListBuilder extends EntityListBuilder {
 
 Eof;
 
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@module_name" => $this->config['name'],
       "@entity_name" => $entity_name,
 	  "@EntityName" => $EntityName,
     ));
-	
+
     return $ret;
   }
 
@@ -420,9 +420,15 @@ class @EntityNameForm extends ContentEntityForm {
 
     switch (\$status) {
       case SAVED_NEW:
-        drupal_set_message(\$this->t('Created the %label.', [
-          '%label' => \$entity->label(),
-        ]));
+        if (floatval(\Drupal::VERSION) >= 8.5) {
+          \Drupal::messenger()->addMessage('Created the %label.', [
+              '%label' => \$entity->label(),
+            ]));
+        } else {
+          drupal_set_message('Created the %label.', [
+              '%label' => \$entity->label(),
+            ]));
+        }
         break;
 
       default:
@@ -437,7 +443,7 @@ class @EntityNameForm extends ContentEntityForm {
 
 Eof;
 
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@module_name" => $this->config['name'],
       "@entity_name" => $entity_name,
 	  "@EntityName" => $EntityName,
@@ -505,7 +511,7 @@ class @EntityNameDeleteForm extends ContentEntityConfirmFormBase {
 
 Eof;
 
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@module_name" => $this->config['name'],
       "@entity_name" => $entity_name,
 	  "@EntityName" => $EntityName,
@@ -579,7 +585,7 @@ class @EntityNameAccessControlHandler extends EntityAccessControlHandler {
 
 Eof;
 
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@module_name" => $this->config['name'],
       "@entity_name" => $entity_name,
 	  "@EntityName" => $EntityName,
@@ -661,7 +667,7 @@ Eof;
 
 	$content_types = isset($this->config['content_types']) ? $this->config['content_types'] : [];
     foreach($content_types as $content_type_id){
-      $ret .= format_string($template, array(
+      $ret .= new FormattableMarkup($template, array(
         "@entity_name" => $content_type_id,
       ));
     }
@@ -686,7 +692,7 @@ Eof;
 
 	$content_types = isset($this->config['content_types']) ? $this->config['content_types'] : [];
     foreach($content_types as $content_type_id){
-      $ret .= format_string($template, array(
+      $ret .= new FormattableMarkup($template, array(
         "@module_name" => $this->config['name'],
         "@entity_name" => $content_type_id,
       ));
@@ -724,7 +730,7 @@ Eof;
 
 	$content_types = isset($this->config['content_types']) ? $this->config['content_types'] : [];
     foreach($content_types as $content_type_id){
-      $ret .= format_string($template, array(
+      $ret .= new FormattableMarkup($template, array(
         "@entity_name" => $content_type_id,
       ));
     }
@@ -750,7 +756,7 @@ Eof;
 	$content_types = isset($this->config['content_types']) ? $this->config['content_types'] : [];
     foreach($content_types as $content_type_id){
 	  $EntityName = ucwords(str_replace('_', ' ', $content_type_id));
-      $ret .= format_string($template, array(
+      $ret .= new FormattableMarkup($template, array(
         "@entity_name" => $content_type_id,
         "@EntityName" => $EntityName,
       ));
@@ -810,14 +816,14 @@ Eof;
 
 	$content_types = isset($this->config['content_types']) ? $this->config['content_types'] : [];
     foreach($content_types as $content_type_id){
-      $content_type = \Drupal::entityManager()->getStorage('content_type')->load($content_type_id);
+      $content_type = \Drupal::entityTypeManager()->getStorage('content_type')->load($content_type_id);
       $paths = $content_type->getEntityPaths();
       $path_view = !empty($paths['view']) ? $paths['view'] : "/$content_type_id/{" . $content_type_id . "}";
       $path_add = !empty($paths['add']) ? $paths['add'] : "/$content_type_id/add";
       $path_edit = !empty($paths['edit']) ? $paths['edit'] : "/$content_type_id/{" . $content_type_id . "}/edit";
       $path_delete = !empty($paths['delete']) ? $paths['delete'] : "/$content_type_id/{" . $content_type_id . "}/delete";	
 	  $EntityName = ucwords(str_replace('_', ' ', $content_type_id));
-      $ret .= format_string($template, array(
+      $ret .= new FormattableMarkup($template, array(
         "@entity_name" => $content_type_id,
         "@EntityName" => $EntityName,		
         "@path_view" => $path_view,

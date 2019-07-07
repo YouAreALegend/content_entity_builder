@@ -16,7 +16,8 @@ class ContentTypeAddForm extends ContentTypeFormBase {
     parent::validateForm($form, $form_state);
     $id = trim($form_state->getValue('id'));
     $entity_types = \Drupal::entityTypeManager()->getDefinitions();
-    if (array_key_exists($id, $entity_types) || db_table_exists($id)) {
+    $schema = \Drupal::database()->schema();
+    if (array_key_exists($id, $entity_types) || $schema->tableExists($id)) {
       $form_state->setErrorByName('id', $this->t("Invalid machine-readable name. Enter a name other than %invalid.", ['%invalid' => $id]));
     }
 
@@ -25,15 +26,19 @@ class ContentTypeAddForm extends ContentTypeFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     // Set default entity keys.
     $keys = [
       'id' => 'id',
       'uuid' => 'uuid',
     ];
     $this->entity->setEntityKeys($keys);
-    parent::submitForm($form, $form_state);
-    drupal_set_message($this->t('Type %name was created.', ['%name' => $this->entity->label()]));
+    parent::save($form, $form_state);
+    if (floatval(\Drupal::VERSION) >= 8.5) {
+      \Drupal::messenger()->addMessage($this->t('Type %name was created...', ['%name' => $this->entity->label()]));
+    } else {
+      drupal_set_message($this->t('Type %name was created...', ['%name' => $this->entity->label()]));
+    }
   }
 
   /**
@@ -41,7 +46,7 @@ class ContentTypeAddForm extends ContentTypeFormBase {
    */
   public function actions(array $form, FormStateInterface $form_state) {
     $actions = parent::actions($form, $form_state);
-    $actions['submit']['#value'] = $this->t('Create new type');
+    $actions['submit']['#value'] = $this->t('Create new types');
 
     return $actions;
   }

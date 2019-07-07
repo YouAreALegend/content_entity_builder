@@ -2,7 +2,6 @@
 
 namespace Drupal\content_entity_builder;
 
-use Drupal\Core\Routing\UrlGeneratorTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\content_entity_builder\Entity\ContentType;
 
@@ -12,7 +11,6 @@ use Drupal\content_entity_builder\Entity\ContentType;
 class ContentEntityBuilderPermissions {
 
   use StringTranslationTrait;
-  use UrlGeneratorTrait;
 
   /**
    * Returns an array of content type permissions.

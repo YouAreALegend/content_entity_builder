@@ -2,11 +2,11 @@
 
 namespace Drupal\content_entity_builder;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleUninstallValidatorInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Url;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 
 /**
@@ -18,19 +18,19 @@ class ContentEntityBuilderUninstallValidator implements ModuleUninstallValidator
   /**
    * The entity manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityManager;
 
   /**
    * Constructs a new ContentUninstallValidator.
    *
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *   The string translation service.
    */
-  public function __construct(EntityManagerInterface $entity_manager, TranslationInterface $string_translation) {
+  public function __construct(EntityTypeManagerInterface $entity_manager, TranslationInterface $string_translation) {
     $this->entityManager = $entity_manager;
     $this->stringTranslation = $string_translation;
   }

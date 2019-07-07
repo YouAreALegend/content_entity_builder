@@ -19,7 +19,7 @@ class ContentEntityBuilderStorageSchema extends SqlContentEntityStorageSchema {
     $schema = parent::getSharedTableFieldSchema($storage_definition, $table_name, $column_mapping);
     $field_name = $storage_definition->getName();
 
-	$content_type = \Drupal::entityManager()->getStorage('content_type')->load($table_name);
+	$content_type = \Drupal::entityTypeManager()->getStorage('content_type')->load($table_name);
     $base_field = $content_type->getBaseField($field_name);
 
 	if (isset($base_field) && !empty($base_field->hasIndex())) {

@@ -6,5 +6,5 @@ services:
     class: Drupal\content_entity_builder\ContentEntityBuilderUninstallValidator
     tags:
       - { name: module_install.uninstall_validator }
-    arguments: ['@entity.manager', '@string_translation']
+    arguments: ['@entity_type.manager', '@string_translation']
     lazy: true

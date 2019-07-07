@@ -5,6 +5,7 @@ namespace Drupal\content_entity_builder\Plugin\BaseFieldConfig;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\content_entity_builder\ConfigurableBaseFieldConfigBase;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Component\Render\FormattableMarkup;
 
 /**
  * ChangedItemBaseFieldConfig.
@@ -80,7 +81,7 @@ class ChangedItemBaseFieldConfig extends ConfigurableBaseFieldConfigBase {
 
 Eof;
 
-    $ret = format_string($template, array(
+    $ret = new FormattableMarkup($template, array(
       "@field_name" => $this->getFieldName(),
       "@label" => $this->getLabel(),
       "@description" => $this->getDescription(),

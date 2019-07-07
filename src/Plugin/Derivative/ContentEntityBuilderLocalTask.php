@@ -2,7 +2,7 @@
 
 namespace Drupal\content_entity_builder\Plugin\Derivative;
 
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
@@ -26,7 +26,7 @@ class ContentEntityBuilderLocalTask extends DeriverBase implements ContainerDeri
   /**
    * The entity manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityManager;
 
@@ -35,12 +35,12 @@ class ContentEntityBuilderLocalTask extends DeriverBase implements ContainerDeri
    *
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
    *   The route provider.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *   The translation manager.
    */
-  public function __construct(RouteProviderInterface $route_provider, EntityManagerInterface $entity_manager, TranslationInterface $string_translation) {
+  public function __construct(RouteProviderInterface $route_provider, EntityTypeManagerInterface $entity_manager, TranslationInterface $string_translation) {
     $this->routeProvider = $route_provider;
     $this->entityManager = $entity_manager;
     $this->stringTranslation = $string_translation;
@@ -52,7 +52,7 @@ class ContentEntityBuilderLocalTask extends DeriverBase implements ContainerDeri
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
       $container->get('router.route_provider'),
-      $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('string_translation')
     );
   }

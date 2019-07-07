@@ -388,6 +388,9 @@ class ContentTypeEditForm extends ContentTypeFormBase {
                 case 1:
                   \Drupal::service('entity_type.listener')
                     ->onEntityTypeCreate($entity_type);
+                  $original = $this->entityTypeManager->getActiveDefinition($entity_type_id);
+                  \Drupal::service('entity_type.listener')
+                    ->onEntityTypeUpdate($entity_type, $original);
                   break;
                 // Updated.
                 case 2:
@@ -400,32 +403,20 @@ class ContentTypeEditForm extends ContentTypeFormBase {
           }
           else {
             if (!empty($change_list['field_storage_definitions'])) {
-//            $original = $this->entityManager->getLastInstalledDefinition($entity_type_id);
-              $original = $this->entityTypeManager->getActiveDefinition($entity_type_id);
-              \Drupal::service('entity_type.listener')
-                ->onEntityTypeUpdate($entity_type, $original);
+              $update_manager = \Drupal::entityDefinitionUpdateManager();
+              $update_manager->updateEntityType($entity_type);
+
+              $definitions = \Drupal::service('entity_field.manager')
+                ->getFieldStorageDefinitions($entity_type->id());
+              $update_manager->updateFieldableEntityType($entity_type, $definitions);
+
+              $this->logger('content_entity_builder')->notice(
+                'Entity type %id has been updated.',
+                ['%id' => $entity_type->id()]
+              );
             }
           }
         }
-//          if (!empty($change_list['entity_type'])) {
-//            $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
-//            if ($entity_type instanceof ContentEntityTypeInterface) {
-//              switch ($change_list['entity_type']) {
-//                // Created.
-//                case 1:
-//                  \Drupal::service('entity_type.listener')
-//                    ->onEntityTypeCreate($entity_type);
-//                  break;
-//
-//                // Updated.
-//                case 2:
-//                  $original = $this->entityTypeManager->getLastInstalledDefinition($entity_type_id);
-//                  \Drupal::service('entity_type.listener')
-//                    ->onEntityTypeUpdate($entity_type, $original);
-//                  break;
-//              }
-//            }
-//          }
       }
     }
     \Drupal::service('router.builder')->rebuild();

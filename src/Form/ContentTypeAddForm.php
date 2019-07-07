@@ -35,9 +35,9 @@ class ContentTypeAddForm extends ContentTypeFormBase {
     $this->entity->setEntityKeys($keys);
     parent::save($form, $form_state);
     if (floatval(\Drupal::VERSION) >= 8.5) {
-      \Drupal::messenger()->addMessage($this->t('Type %name was created...', ['%name' => $this->entity->label()]));
+      \Drupal::messenger()->addMessage($this->t('Type %name was created.', ['%name' => $this->entity->label()]));
     } else {
-      drupal_set_message($this->t('Type %name was created...', ['%name' => $this->entity->label()]));
+      drupal_set_message($this->t('Type %name was created.', ['%name' => $this->entity->label()]));
     }
   }
 

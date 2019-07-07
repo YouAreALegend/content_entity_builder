@@ -3,6 +3,7 @@
 namespace Drupal\content_entity_builder;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\content_entity_builder\ContentTypeInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Component\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Field\BaseFieldDefinition;

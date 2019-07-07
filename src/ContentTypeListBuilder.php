@@ -49,7 +49,11 @@ class ContentTypeListBuilder extends ConfigEntityListBuilder {
     // which have the weights 15, 20, 25.
     if (isset($operations['edit'])) {
       //$operations['edit']['weight'] = 30;
-      $operations['edit']['url'] = $entity->toUrl('edit-form');
+      if (floatval(\Drupal::VERSION) >= 8.5) {
+        $operations['edit']['url'] = $entity->toUrl('edit-form');
+      } else {
+        $operations['edit']['url'] = $entity->urlInfo('edit-form');
+      }
     }
     return $operations;
   }

@@ -374,62 +374,60 @@ class ContentTypeEditForm extends ContentTypeFormBase {
     parent::save($form, $form_state);
     $this->entityTypeManager->clearCachedDefinitions();
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
-    $complete_change_list = \Drupal::entityDefinitionUpdateManager()->getChangeList();
+    $complete_change_list = \Drupal::entityDefinitionUpdateManager()
+      ->getChangeList();
 
     if ($complete_change_list) {
       foreach ($complete_change_list as $entity_type_id => $change_list) {
-        if (!empty($change_list['entity_type'])) {
+        if (!empty($change_list)) {
           $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
-          if ($entity_type instanceof ContentEntityTypeInterface) {
-            switch ($change_list['entity_type']) {
-              // Created.
-              case 1:
-                \Drupal::service('entity_type.listener')->onEntityTypeCreate($entity_type);
-                break;
-
-              // Updated.
-              case 2:
-                $original = $this->entityTypeManager->getLastInstalledDefinition($entity_type_id);
-                \Drupal::service('entity_type.listener')->onEntityTypeUpdate($entity_type, $original);
-                break;
+          if (!empty($change_list['entity_type'])) {
+            if ($entity_type instanceof ContentEntityTypeInterface) {
+              switch ($change_list['entity_type']) {
+                // Created.
+                case 1:
+                  \Drupal::service('entity_type.listener')
+                    ->onEntityTypeCreate($entity_type);
+                  break;
+                // Updated.
+                case 2:
+                  $original = $this->entityTypeManager->getActiveDefinition($entity_type_id);
+                  \Drupal::service('entity_type.listener')
+                    ->onEntityTypeUpdate($entity_type, $original);
+                  break;
+              }
+            }
+          }
+          else {
+            if (!empty($change_list['field_storage_definitions'])) {
+//            $original = $this->entityManager->getLastInstalledDefinition($entity_type_id);
+              $original = $this->entityTypeManager->getActiveDefinition($entity_type_id);
+              \Drupal::service('entity_type.listener')
+                ->onEntityTypeUpdate($entity_type, $original);
             }
           }
         }
+//          if (!empty($change_list['entity_type'])) {
+//            $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+//            if ($entity_type instanceof ContentEntityTypeInterface) {
+//              switch ($change_list['entity_type']) {
+//                // Created.
+//                case 1:
+//                  \Drupal::service('entity_type.listener')
+//                    ->onEntityTypeCreate($entity_type);
+//                  break;
+//
+//                // Updated.
+//                case 2:
+//                  $original = $this->entityTypeManager->getLastInstalledDefinition($entity_type_id);
+//                  \Drupal::service('entity_type.listener')
+//                    ->onEntityTypeUpdate($entity_type, $original);
+//                  break;
+//              }
+//            }
+//          }
       }
     }
-    \Drupal::service('router.builder')->rebuild();
-    \Drupal::cache('discovery')->deleteAll();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function saveAndApplyUpdates(array $form, FormStateInterface $form_state) {
-    $this->entity->setApplied(TRUE);
-    foreach ($this->entity->getBaseFields() as $base_field) {
-      $base_field->setApplied(TRUE);
-    }
-    $id = trim($form_state->getValue('id'));
-    $schema = \Drupal::database()->schema();
-    $edit_link = $this->entity->toLink(t('Edit entity type'));
-    // Clear caches first.
-    $this->entity->entityTypeManager->clearCachedDefinitions();
-    $entity_type = $this->entity->entityTypeManager->getDefinition($this->entity->id());
-    if ($schema->tableExists($id)) {
-      $update_manager = \Drupal::entityDefinitionUpdateManager();
-      $update_manager->updateEntityType($entity_type);
-
-      $definitions = \Drupal::service('entity_field.manager')
-        ->getFieldStorageDefinitions($this->entity->id());
-      $update_manager->updateFieldableEntityType($entity_type, $definitions);
-
-      $this->logger($this->entity->id())->notice(
-        'Entity type %label has been updated.',
-        ['%label' => $this->entity->label(), 'link' => $edit_link]
-      );
-    }
-    parent::save($form, $form_state);
-
     \Drupal::service('router.builder')->rebuild();
     \Drupal::cache('discovery')->deleteAll();
   }
